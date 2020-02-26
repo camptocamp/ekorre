@@ -78,23 +78,29 @@ def _backup_snapshot(bucket, snapshot_name, ekorre_role, kms_key):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--log-level", help="Logging level",
+    parser.add_argument("--log-level", help="Logging level. \
+                            (EKORRE_LOG_LEVEL)",
                         type=str, default=os.environ.get(
                             'EKORRE_LOG_LEVEL', 'INFO'))
-    parser.add_argument("--address", help="Address the daemon will bind on.",
+    parser.add_argument("--address", help="Address the daemon will bind on. \
+                            (EKORRE_DAEMON_ADDRESS)",
                         type=str, default=os.environ.get(
                             'EKORRE_DAEMON_ADDRESS', '0.0.0.0'))
-    parser.add_argument("--port", help="Port the daemon will bind on.",
+    parser.add_argument("--port", help="Port the daemon will bind on. \
+                            (EKORRE_DAEMON_PORT)",
                         type=str, default=os.environ.get(
                             'EKORRE_DAEMON_PORT', '8582'))
-    parser.add_argument("--destination-bucket", help="Bucket where the snapshot will be stored.",
+    parser.add_argument("--destination-bucket", help="Bucket where the snapshot will be stored. \
+                            (EKORRE_DESTINATION_BUCKET)",
                         type=str, default=os.environ.get(
                             'EKORRE_DESTINATION_BUCKET'))
-    parser.add_argument("--kms-key", help="KMS key used to encrypt the backups.",
+    parser.add_argument("--kms-key", help="KMS key used to encrypt the backups. \
+                            (EKORRE_KMS_KEY)",
                         type=str, default=os.environ.get(
                             'EKORRE_KMS_KEY'))
     parser.add_argument("--refresh-interval",
-                        help="Interval between the refresh of the snapshots' list.",
+                        help="Interval between the refresh of the snapshots' list (default: 24h). \
+                                (EKORRE_REFRESH_INTERVAL)",
                         type=str, default=os.environ.get(
                             'EKORRE_REFRESH_INTERVAL', '24h'))
 
