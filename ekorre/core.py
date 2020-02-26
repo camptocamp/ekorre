@@ -78,15 +78,15 @@ def _backup_snapshot(bucket, snapshot_name, ekorre_role, kms_key):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--log-level", help="Logging level. \
+    parser.add_argument("--log-level", help="Logging level (default: INFO). \
                             (EKORRE_LOG_LEVEL)",
                         type=str, default=os.environ.get(
                             'EKORRE_LOG_LEVEL', 'INFO'))
-    parser.add_argument("--address", help="Address the daemon will bind on. \
+    parser.add_argument("--address", help="Address the daemon will bind on (default: 0.0.0.0). \
                             (EKORRE_DAEMON_ADDRESS)",
                         type=str, default=os.environ.get(
                             'EKORRE_DAEMON_ADDRESS', '0.0.0.0'))
-    parser.add_argument("--port", help="Port the daemon will bind on. \
+    parser.add_argument("--port", help="Port the daemon will bind on (default: 8582). \
                             (EKORRE_DAEMON_PORT)",
                         type=str, default=os.environ.get(
                             'EKORRE_DAEMON_PORT', '8582'))
