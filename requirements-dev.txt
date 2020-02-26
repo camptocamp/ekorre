@@ -1,0 +1,8 @@
+argparse
+prometheus_client
+boto3
+pytest
+pylint
+mock
+moto
+pytimeparse
