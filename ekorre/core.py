@@ -5,7 +5,15 @@ import time
 import boto3
 from botocore.exceptions import ClientError
 from pytimeparse.timeparse import timeparse
-from prometheus_client import start_http_server
+from prometheus_client import start_http_server, Gauge
+
+# Prometheus metrics
+metrics_description = {
+        'backup_start_time': "Timestamp of when the backup has been started",
+        'backup_end_time': "Timestamp of when the backup has ended",
+        'backup_success': "Status of the backup",
+    }
+metrics = {}
 
 def _setup_logging(log_level):
     numeric_level = getattr(logging, log_level.upper(), None)
@@ -51,9 +59,19 @@ def _wait_for_export(rds_client, export_id):
         status = res['ExportTasks'][0]['Status']
         if status not in ('IN_PROGRESS', 'STARTING'):
             logging.info("Export `%s` ended with status: %s", export_id, status)
-            return
+            raise
 
         time.sleep(30)
+
+def _set_metric(metric_name, snapshot_name):
+    global metrics
+    if metric_name not in metrics:
+        metrics[metric_name] = Gauge(
+            "ekorre_{}".format(metric_name),
+            metrics_description[metric_name],
+            ['snapshot'])
+    return metrics[metric_name].labels(snapshot=snapshot_name)
+
 
 def _backup_snapshot(bucket, snapshot_name, ekorre_role, kms_key):
     rds_client = boto3.client('rds')
@@ -67,6 +85,7 @@ def _backup_snapshot(bucket, snapshot_name, ekorre_role, kms_key):
     snapshot = db_snapshots['DBSnapshots'][0]
 
     logging.info("Backing up snapshot `%s`", snapshot_name)
+    _set_metric('backup_start_time', snapshot_name).set_to_current_time()
     try:
         response = rds_client.start_export_task(
             ExportTaskIdentifier=snapshot_name,
@@ -77,8 +96,14 @@ def _backup_snapshot(bucket, snapshot_name, ekorre_role, kms_key):
         )
         export_id = response['ExportTaskIdentifier']
         _wait_for_export(rds_client, export_id)
-    except ClientError as err:
+    except Exception as err:
+        _set_metric('backup_success', snapshot_name).set(0)
         logging.error("Failed to backup snapshot `%s`: %s", snapshot_name, err)
+    else:
+        _set_metric('backup_success', snapshot_name).set(1)
+        logging.info("Snapshot `%s` successfully backed up", snapshot_name)
+    finally:
+        _set_metric('backup_end_time', snapshot_name).set_to_current_time()
 
 def main():
     parser = argparse.ArgumentParser()
