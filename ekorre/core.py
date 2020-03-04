@@ -107,7 +107,7 @@ def _backup_snapshot(bucket, snapshot_name, ekorre_role, kms_key):
             logging.error("Failed to backup snapshot `%s`: %s", snapshot_name, err)
     except Exception as err:
         _set_metric('backup_success', snapshot_name).set(0)
-        logging.error("Failed to backup snapshot `%s`: %s", snapshot_name, err)
+        logging.error("Failed to backup snapshot `%s`: [%s] %s", type(err).__name__, snapshot_name, err)
     else:
         _set_metric('backup_success', snapshot_name).set(1)
         logging.info("Snapshot `%s` successfully backed up", snapshot_name)
