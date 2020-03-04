@@ -42,7 +42,7 @@ def _list_s3_snapshots(bucket):
                 Bucket=bucket,
                 Delimiter='/')
 
-    if len(response['CommonPrefixes']) == 0:
+    if response['KeyCount'] == 0:
         return []
 
     return [obj['Prefix'].replace('/', '') for obj in response['CommonPrefixes']]
