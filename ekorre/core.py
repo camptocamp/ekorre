@@ -98,6 +98,13 @@ def _backup_snapshot(bucket, snapshot_name, ekorre_role, kms_key):
         )
         export_id = response['ExportTaskIdentifier']
         _wait_for_export(rds_client, export_id)
+    except ClientError as err:
+        if err.response['Error']['Code'] == "ExportTaskAlreadyExists":
+            logging.info("attaching to running export task...")
+            _wait_for_export(rds_client, snapshot_name)
+        else:
+            _set_metric('backup_success', snapshot_name).set(0)
+            logging.error("Failed to backup snapshot `%s`: %s", snapshot_name, err)
     except Exception as err:
         _set_metric('backup_success', snapshot_name).set(0)
         logging.error("Failed to backup snapshot `%s`: %s", snapshot_name, err)
