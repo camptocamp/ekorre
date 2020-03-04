@@ -59,8 +59,10 @@ def _wait_for_export(rds_client, export_id):
         status = res['ExportTasks'][0]['Status']
         if status not in ('IN_PROGRESS', 'STARTING'):
             logging.info("Export `%s` ended with status: %s", export_id, status)
-            raise
-
+            if status == "COMPLETE":
+                return
+            else:
+                raise Exception("Export `%s` did not ended successfully: %s".format(export_id, status))
         time.sleep(30)
 
 def _set_metric(metric_name, snapshot_name):
